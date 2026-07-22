@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAMS Clinical</title>
+<style>
+  :root {
+    --bg:#eef1f5; --panel:#ffffff; --panel-2:#f7f9fb;
+    --rail:#0f2438; --rail-2:#16324b; --rail-text:#9fb3c6; --rail-dim:#6c839a;
+    --text:#16202b; --muted:#5d6b7a; --faint:#8a97a5;
+    --line:#e0e6ec; --line-2:#eef2f6;
+    --brand:#c0392b; --brand-2:#a5322a;
+    --accent:#1f5f8b;
+    --red:#c0392b; --red-bg:#fbecea; --red-line:#e8b4ae;
+    --amber:#b7791f; --amber-bg:#fbf3e2; --amber-line:#ead9b5;
+    --green:#2f7d4f; --green-bg:#eaf5ee; --green-line:#bfe0cb;
+    --sky:#1f6f9c; --rose:#b23a5b; --violet:#6b4f9e; --orange:#c05a1e; --teal:#1f8a80;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(16,32,50,.05),0 2px 8px rgba(16,32,50,.04);
+  }
+  [data-theme="dark"],body[data-theme="dark"]{
+    --bg:#0e1319; --panel:#161c24; --panel-2:#1b232d;
+    --rail:#0a0f15; --rail-2:#141d27; --rail-text:#8fa2b5; --rail-dim:#5a6b7c;
+    --text:#e7edf3; --muted:#93a1af; --faint:#6f7d8a;
+    --line:#28323d; --line-2:#212a34;
+    --brand:#e05c4c;
+    --red:#eb6a5b; --red-bg:#2c1917; --red-line:#4a2621;
+    --amber:#e0a94a; --amber-bg:#2a2113; --amber-line:#463620;
+    --green:#5cc07f; --green-bg:#152618; --green-line:#274634;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);color:var(--text);display:flex;overflow:hidden;
+    font-size:14px;-webkit-font-smoothing:antialiased;line-height:1.5;
+  }
+
+  /* ---- left rail ---- */
+  aside{
+    width:210px;flex-shrink:0;background:var(--rail);
+    display:flex;flex-direction:column;padding:16px 0;
+  }
+  .logo{display:flex;align-items:center;gap:10px;padding:0 18px 16px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:10px}
+  .logo .mark{width:34px;height:34px;border-radius:8px;background:var(--brand);position:relative;flex-shrink:0}
+  .logo .mark:before,.logo .mark:after{content:"";position:absolute;background:#fff;border-radius:1px}
+  .logo .mark:before{width:16px;height:5px;top:14.5px;left:9px}
+  .logo .mark:after{width:5px;height:16px;top:9px;left:14.5px}
+  .logo h1{font-size:15px;font-weight:700;color:#fff;letter-spacing:.3px}
+  .logo p{font-size:10px;color:var(--rail-dim);margin-top:1px}
+
+  .rail-sec{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--rail-dim);padding:12px 18px 5px}
+  aside button.nav{
+    display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+    padding:9px 18px;background:none;border:none;border-left:3px solid transparent;
+    color:var(--rail-text);font:inherit;font-size:13.5px;cursor:pointer
+  }
+  aside button.nav:hover{color:#fff;background:rgba(255,255,255,.04)}
+  aside button.nav.on{color:#fff;background:rgba(255,255,255,.06);border-left-color:var(--brand);font-weight:600}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .railfoot{margin-top:auto;padding:12px 18px 0;font-size:10px;color:var(--rail-dim);line-height:1.5;border-top:1px solid rgba(255,255,255,.06)}
+
+  /* ---- main ---- */
+  main{flex:1;overflow-y:auto;position:relative}
+  .topbar{
+    position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:14px;padding:12px 24px
+  }
+  .searchwrap{position:relative;flex:1;max-width:520px}
+  .searchwrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--faint);font-size:15px}
+  #search{
+    width:100%;padding:10px 12px 10px 34px;border:1px solid var(--line);border-radius:9px;
+    background:var(--panel-2);color:var(--text);font:inherit;font-size:13.5px;outline:none
+  }
+  #search:focus{border-color:var(--accent);background:var(--panel)}
+  .toolbtn{
+    display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);
+    border-radius:8px;background:var(--panel);color:var(--muted);font:inherit;font-size:12.5px;cursor:pointer
+  }
+  .toolbtn:hover{color:var(--text);border-color:var(--accent)}
+
+  .content{padding:22px 24px 48px;max-width:960px}
+
+  /* search dropdown */
+  #results{
+    position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);
+    max-height:60vh;overflow-y:auto;display:none;z-index:30
+  }
+  #results.show{display:block}
+  .res{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--line-2)}
+  .res:last-child{border-bottom:none}
+  .res:hover,.res.sel{background:var(--panel-2)}
+  .res .rt{font-weight:600;font-size:13.5px}
+  .res .rs{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .res .rtype{margin-left:auto;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);flex-shrink:0}
+
+  /* dashboard cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .pcard{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px;cursor:pointer;box-shadow:var(--shadow);border-top:3px solid var(--line);transition:border-color .12s
+  }
+  .pcard:hover{border-color:var(--accent)}
+  .pcard .pc-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .pcard h3{font-size:14px;font-weight:600}
+  .pcard p{font-size:12px;color:var(--muted);line-height:1.45}
+  .pri{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:20px;margin-left:auto;flex-shrink:0}
+  .pri.red{background:var(--red-bg);color:var(--red)}
+  .pri.amber{background:var(--amber-bg);color:var(--amber)}
+  .pri.green{background:var(--green-bg);color:var(--green)}
+
+  .secttitle{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
+  .secttitle:first-child{margin-top:4px}
+
+  /* protocol page */
+  .crumb{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .crumb a{color:var(--accent);cursor:pointer;text-decoration:none}
+  .phead{display:flex;align-items:flex-start;gap:14px;margin-bottom:6px}
+  .phead h2{font-size:23px;font-weight:700;line-height:1.2}
+  .phead .pri{font-size:11px;padding:4px 10px;margin-top:5px}
+  .psum{font-size:15px;color:var(--muted);margin-bottom:20px;line-height:1.55;max-width:70ch}
+
+  .block{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+  .block-h{display:flex;align-items:center;gap:9px;padding:12px 16px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.4px}
+  .block-h i{font-size:16px}
+  .block-b{padding:14px 16px}
+  .block.flag .block-h{background:var(--red-bg);color:var(--red);border-bottom-color:var(--red-line)}
+  .block.treat .block-h{color:var(--green)}
+  .block.assess .block-h{color:var(--accent)}
+  .block.trans .block-h{color:var(--amber)}
+
+  ol.steps{list-style:none;counter-reset:s}
+  ol.steps li{counter-increment:s;position:relative;padding:8px 0 8px 34px;border-bottom:1px solid var(--line-2);font-size:14px}
+  ol.steps li:last-child{border-bottom:none}
+  ol.steps li:before{
+    content:counter(s);position:absolute;left:0;top:7px;width:22px;height:22px;border-radius:50%;
+    background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
+    font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center
+  }
+  ul.flat{list-style:none}
+  ul.flat li{padding:7px 0 7px 18px;position:relative;font-size:14px;border-bottom:1px solid var(--line-2)}
+  ul.flat li:last-child{border-bottom:none}
+  ul.flat li:before{content:"";position:absolute;left:2px;top:15px;width:5px;height:5px;border-radius:50%;background:var(--red)}
+  ul.flat.assesslist li:before{background:var(--accent)}
+
+  /* drug chips + table */
+  .drugchips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);cursor:pointer;font-size:13px}
+  .chip:hover{border-color:var(--accent)}
+  .chip .cd{color:var(--muted);font-size:11.5px}
+
+  /* decision tree */
+  .tree{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .tq{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+  .tq .qi{width:28px;height:28px;border-radius:8px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+  .tq .qt{font-size:16px;font-weight:600;line-height:1.4;padding-top:3px}
+  .tbtns{display:flex;gap:10px;flex-wrap:wrap}
+  .tbtn{flex:1;min-width:140px;padding:12px 16px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);cursor:pointer;font:inherit;font-size:14px;font-weight:600;text-align:left;display:flex;align-items:center;gap:8px}
+  .tbtn.yes{border-color:var(--green-line)} .tbtn.yes:hover{background:var(--green-bg);color:var(--green)}
+  .tbtn.no{border-color:var(--red-line)} .tbtn.no:hover{background:var(--red-bg);color:var(--red)}
+  .tbtn i{font-size:17px}
+  .tleaf{background:var(--green-bg);border:1px solid var(--green-line);border-radius:9px;padding:16px;font-size:15px;line-height:1.55}
+  .tpath{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+  .tpath .pp{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted)}
+  .treset{margin-top:16px}
+
+  /* formulary */
+  .drugrow{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow)}
+  .drugrow-h{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer}
+  .drugrow-h:hover{background:var(--panel-2)}
+  .drugrow-h .dn{font-weight:600;font-size:14.5px}
+  .drugrow-h .dclass{font-size:11px;color:var(--muted);background:var(--panel-2);padding:2px 8px;border-radius:20px;border:1px solid var(--line)}
+  .drugrow-h .ddose{margin-left:auto;font-size:13px;color:var(--accent);font-weight:600;text-align:right}
+  .drugrow-b{padding:0 16px;max-height:0;overflow:hidden;transition:max-height .2s ease,padding .2s ease}
+  .drugrow.open .drugrow-b{max-height:400px;padding:4px 16px 16px}
+  .dfield{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--line-2);font-size:13.5px}
+  .dfield .dk{width:110px;flex-shrink:0;color:var(--muted);font-weight:600}
+  .dfield.caution .dv{color:var(--amber)}
+  .usedin-list{display:flex;flex-wrap:wrap;gap:5px}
+  .usedin-link{
+    display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;
+    background:var(--panel-2);border:1px solid var(--line);color:var(--accent);
+    cursor:pointer;font-weight:500;text-decoration:none
+  }
+  .usedin-link:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* admin editor */
+  .adminbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+  .btn{padding:9px 16px;border:none;border-radius:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--text)}
+  .btn.danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-line)}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+  .field input,.field textarea,.field select{
+    width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;
+    background:var(--panel);color:var(--text);font:inherit;font-size:13.5px;outline:none
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+  .field textarea{resize:vertical;min-height:80px;line-height:1.6}
+  .field .hint{font-size:11px;color:var(--faint);margin-top:4px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .editlist .drugrow-h{cursor:default}
+  .banner{padding:11px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:9px}
+  .banner.info{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-line)}
+  .banner.ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-line)}
+
+  .drugcheck{
+    display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--line);
+    border-radius:7px;background:var(--panel);cursor:pointer;font-size:13px;user-select:none;
+    transition:border-color .1s,background .1s
+  }
+  .drugcheck:hover{border-color:var(--accent);background:var(--panel-2)}
+  .drugcheck.checked{border-color:var(--green-line);background:var(--green-bg)}
+  .dc-box{
+    width:18px;height:18px;border-radius:4px;border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    font-size:12px;color:var(--green);font-weight:700;background:var(--panel)
+  }
+  .drugcheck.checked .dc-box{border-color:var(--green);background:var(--green-bg)}
+  .dc-name{font-weight:500}
+  .drugpicker{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;padding:4px 0}
+
+  .disc{font-size:11.5px;color:var(--faint);margin-top:28px;padding-top:14px;border-top:1px solid var(--line);line-height:1.6}
+
+  @media (max-width:720px){
+    aside{width:64px}
+    .logo h1,.logo p,.rail-sec,aside button.nav span.lbl,.railfoot{display:none}
+    aside button.nav{justify-content:center;padding:12px 0}
+    .row2{grid-template-columns:1fr}
+  }
+
+  /* tabler icons subset via unicode fallback — we ship simple inline glyphs */
+  .g{font-style:normal;font-weight:700}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="logo">
+    <div class="mark"></div>
+    <div><h1>SAMS</h1><p>Clinical Reference</p></div>
+  </div>
+  <div class="rail-sec">Reference</div>
+  <button class="nav on" data-view="home"><span class="g">▤</span><span class="lbl">Protocols</span></button>
+  <button class="nav" data-view="formulary"><span class="g">℞</span><span class="lbl">Formulary</span></button>
+  <div class="rail-sec">Command</div>
+  <button class="nav" data-view="admin"><span class="g">✎</span><span class="lbl">Admin editor</span></button>
+  <div class="railfoot" id="foot">Roleplay reference only.<br>Not real medical advice.</div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <div class="searchwrap">
+      <i class="g">⌕</i>
+      <input id="search" type="text" placeholder="Search protocols, symptoms or drugs…" autocomplete="off">
+      <div id="results"></div>
+    </div>
+    <button class="toolbtn" id="themebtn"><span class="g">◐</span> Theme</button>
+  </div>
+  <div class="content" id="content"></div>
+</main>
+
+<script src="data.js"></script>
+<script>
+const RESOURCE_NAME = 'sams-clinical';
+
+async function nuiFetch(event, data = {}) {
+  try {
+    if (globalThis.fetchNui) {
+      return await globalThis.fetchNui(event, data, RESOURCE_NAME);
+    }
+    const resp = await fetch(`https://${RESOURCE_NAME}/${event}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return await resp.json();
+  } catch {
+    return null;
+  }
+}
+
+let DATA = JSON.parse(JSON.stringify(typeof SAMS_DATA !== 'undefined' ? SAMS_DATA : { meta:{}, categories:[], drugs:[], protocols:[] }));
+let CAN_EDIT = false;
+
+const $ = s => document.querySelector(s);
+const content = $("#content");
+const catById = id => DATA.categories.find(c => c.id === id);
+const drugById = id => DATA.drugs.find(d => d.id === id);
+const protoById = id => DATA.protocols.find(p => p.id === id);
+const CVAR = { sky:"--sky",red:"--red",rose:"--rose",violet:"--violet",amber:"--amber",orange:"--orange",teal:"--teal" };
+const catColour = id => { const c = catById(id); return c ? `var(${CVAR[c.colour]||"--accent"})` : "var(--accent)"; };
+const esc = s => (s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+
+/* ---------------- navigation ---------------- */
+function setNav(view){
+  document.querySelectorAll("aside .nav").forEach(b=>b.classList.toggle("on",b.dataset.view===view));
+}
+document.querySelectorAll("aside .nav").forEach(b=>{
+  b.addEventListener("click",()=>{ closeSearch(); route(b.dataset.view); });
+});
+
+function route(view,arg){
+  setNav(["home","formulary","admin"].includes(view)?view:"home");
+  if(view==="home") return renderHome();
+  if(view==="protocol") return renderProtocol(arg);
+  if(view==="formulary") return renderFormulary();
+  if(view==="admin") return renderAdmin();
+}
+
+/* ---------------- home / dashboard ---------------- */
+function renderHome(){
+  let html = "";
+  DATA.categories.forEach(cat=>{
+    const ps = DATA.protocols.filter(p=>p.category===cat.id);
+    if(!ps.length) return;
+    html += `<div class="secttitle"><span class="dot" style="background:${catColour(cat.id)}"></span>${esc(cat.name)}</div>`;
+    html += `<div class="grid">`;
+    ps.forEach(p=>{
+      html += `<div class="pcard" style="border-top-color:${catColour(cat.id)}" onclick="route('protocol','${p.id}')">
+        <div class="pc-top"><h3>${esc(p.name)}</h3><span class="pri ${p.priority}">${p.priority}</span></div>
+        <p>${esc(p.summary)}</p></div>`;
+    });
+    html += `</div>`;
+  });
+  content.innerHTML = html + disclaimer();
+}
+
+/* ---------------- protocol page ---------------- */
+function renderProtocol(id){
+  const p = protoById(id);
+  if(!p){ renderHome(); return; }
+  const cat = catById(p.category);
+  let html = `<div class="crumb"><a onclick="route('home')">Protocols</a><span>›</span><span>${esc(cat?cat.name:"")}</span></div>`;
+  html += `<div class="phead"><h2>${esc(p.name)}</h2><span class="pri ${p.priority}">${p.priority}</span></div>`;
+  html += `<div class="psum">${esc(p.summary)}</div>`;
+
+  if(p.assess?.length){
+    html += block("assess","◉","Assessment", `<ul class="flat assesslist">${p.assess.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`);
+  }
+  if(p.redFlags?.length){
+    html += block("flag","⚑","Red flags — transport", `<ul class="flat">${p.redFlags.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`);
+  }
+  if(p.treat?.length){
+    html += block("treat","✚","Treatment on scene", `<ol class="steps">${p.treat.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`);
+  }
+  if(p.drugs?.length){
+    const chips = p.drugs.map(did=>{ const d=drugById(did); if(!d) return ""; 
+      return `<div class="chip" onclick="route('formulary');setTimeout(()=>openDrug('${d.id}'),50)"><span class="g" style="color:var(--accent)">℞</span> ${esc(d.name)} <span class="cd">${esc(d.dose.split(";")[0])}</span></div>`;
+    }).join("");
+    html += block("","℞","Medications", `<div class="drugchips">${chips}</div>`);
+  }
+  if(p.transport){
+    html += block("trans","➜","Transport", `<div style="font-size:14.5px;line-height:1.6">${esc(p.transport)}</div>`);
+  }
+  if(p.tree){
+    html += `<div class="secttitle" style="margin-top:26px">Decision path</div>`;
+    html += `<div id="treehost"></div>`;
+  }
+  content.innerHTML = html + disclaimer();
+  if(p.tree) mountTree(p);
+}
+
+function block(cls,icon,title,body){
+  return `<div class="block ${cls}"><div class="block-h"><i class="g">${icon}</i>${esc(title)}</div><div class="block-b">${body}</div></div>`;
+}
+
+/* ---------------- decision tree ---------------- */
+function mountTree(p){
+  const host = $("#treehost");
+  const wrap = document.createElement("div");
+  wrap.className = "tree";
+  host.replaceChildren(wrap);
+
+  let path = [];
+  let cur = p.tree;
+
+  const pathHtml = () => path.length
+    ? `<div class="tpath">${path.map(s=>`<span class="pp">${esc(s)}</span>`).join("")}</div>` : "";
+
+  function draw(node){
+    if(typeof node === "string"){
+      wrap.innerHTML = pathHtml() +
+        `<div class="tleaf"><b style="display:block;margin-bottom:6px;color:var(--green)">Action</b>${esc(node)}</div>
+         <button class="btn ghost treset" onclick="__treeReset()">↺ Start over</button>`;
+      return;
+    }
+    wrap.innerHTML = pathHtml() +
+      `<div class="tq"><div class="qi g">?</div><div class="qt">${esc(node.q)}</div></div>
+       <div class="tbtns">
+         <button class="tbtn yes" onclick="__treeGo('yes')"><i class="g">✓</i> Yes</button>
+         <button class="tbtn no" onclick="__treeGo('no')"><i class="g">✕</i> No</button>
+       </div>` +
+      (path.length ? `<button class="btn ghost treset" onclick="__treeReset()">↺ Start over</button>` : "");
+  }
+
+  window.__treeGo = ans => { path.push(ans==="yes"?"Yes":"No"); cur = cur[ans]; draw(cur); };
+  window.__treeReset = () => { path = []; cur = p.tree; draw(cur); };
+  draw(cur);
+}
+
+/* ---------------- formulary ---------------- */
+function renderFormulary(filter){
+  const q = (filter||"").toLowerCase();
+  const list = DATA.drugs.filter(d=>!q||d.name.toLowerCase().includes(q)||(d.class||"").toLowerCase().includes(q)||(d.indications||"").toLowerCase().includes(q));
+  let html = `<div class="secttitle" style="margin-top:4px">Formulary <span style="color:var(--faint);font-weight:400;text-transform:none;letter-spacing:0">· ${list.length} medications · tap to expand</span></div>`;
+  html += list.map(d=>{
+    const usedIn = DATA.protocols.filter(p=>(p.drugs||[]).includes(d.id));
+    const usedHtml = usedIn.length
+      ? usedIn.map(p=>`<a class="usedin-link" onclick="route('protocol','${p.id}')">${esc(p.name)}</a>`).join("")
+      : '<span style="color:var(--faint)">Not referenced by any protocol</span>';
+    return `
+    <div class="drugrow" id="drug-${d.id}">
+      <div class="drugrow-h" onclick="toggleDrug('${d.id}')">
+        <span class="dn">${esc(d.name)}</span>
+        <span class="dclass">${esc(d.class||"")}</span>
+        <span class="ddose">${esc(d.dose.split(";")[0])}</span>
+      </div>
+      <div class="drugrow-b">
+        <div class="dfield"><span class="dk">Dose</span><span class="dv">${esc(d.dose)}</span></div>
+        <div class="dfield"><span class="dk">Route</span><span class="dv">${esc(d.route||"")}</span></div>
+        <div class="dfield"><span class="dk">Indications</span><span class="dv">${esc(d.indications||"")}</span></div>
+        <div class="dfield caution"><span class="dk">Cautions</span><span class="dv">${esc(d.cautions||"")}</span></div>
+        <div class="dfield"><span class="dk">Notes</span><span class="dv">${esc(d.notes||"")}</span></div>
+        <div class="dfield"><span class="dk">Used in</span><span class="dv usedin-list">${usedHtml}</span></div>
+      </div>
+    </div>`;
+  }).join("");
+  content.innerHTML = html + disclaimer();
+}
+function toggleDrug(id){ const el=$("#drug-"+id); if(el) el.classList.toggle("open"); }
+function openDrug(id){ const el=$("#drug-"+id); if(el){ el.classList.add("open"); el.scrollIntoView({behavior:"smooth",block:"center"}); } }
+
+/* ---------------- search ---------------- */
+const search = $("#search"), results = $("#results");
+let selIdx = -1, resList = [];
+function buildIndex(){
+  const idx = [];
+  DATA.protocols.forEach(p=>idx.push({type:"Protocol",id:p.id,title:p.name,sub:p.summary,
+    hay:(p.name+" "+p.summary+" "+(p.alsoKnownAs||[]).join(" ")+" "+(p.assess||[]).join(" ")+" "+(p.redFlags||[]).join(" ")).toLowerCase(),go:()=>route("protocol",p.id)}));
+  DATA.drugs.forEach(d=>idx.push({type:"Drug",id:d.id,title:d.name,sub:d.dose.split(";")[0],
+    hay:(d.name+" "+(d.class||"")+" "+(d.indications||"")).toLowerCase(),go:()=>{route("formulary");setTimeout(()=>openDrug(d.id),50);}}));
+  return idx;
+}
+let INDEX = buildIndex();
+search.addEventListener("input",()=>{
+  const q = search.value.trim().toLowerCase();
+  if(!q){ closeSearch(); return; }
+  resList = INDEX.filter(x=>x.hay.includes(q)).slice(0,12);
+  selIdx = -1;
+  if(!resList.length){ results.innerHTML=`<div class="res"><span class="rs">No matches for “${esc(search.value)}”</span></div>`; results.classList.add("show"); return; }
+  results.innerHTML = resList.map((x,i)=>`<div class="res" data-i="${i}" onclick="__pick(${i})">
+    <div><div class="rt">${esc(x.title)}</div><div class="rs">${esc(x.sub)}</div></div>
+    <span class="rtype">${x.type}</span></div>`).join("");
+  results.classList.add("show");
+});
+window.__pick = i=>{ const x=resList[i]; if(x){ closeSearch(); search.value=""; x.go(); } };
+search.addEventListener("keydown",e=>{
+  if(!results.classList.contains("show")) return;
+  if(e.key==="ArrowDown"){ e.preventDefault(); selIdx=Math.min(selIdx+1,resList.length-1); markSel(); }
+  else if(e.key==="ArrowUp"){ e.preventDefault(); selIdx=Math.max(selIdx-1,0); markSel(); }
+  else if(e.key==="Enter"){ e.preventDefault(); if(selIdx>=0) __pick(selIdx); else if(resList.length) __pick(0); }
+  else if(e.key==="Escape"){ closeSearch(); }
+});
+function markSel(){ document.querySelectorAll(".res").forEach((r,i)=>r.classList.toggle("sel",i===selIdx)); }
+function closeSearch(){ results.classList.remove("show"); }
+document.addEventListener("click",e=>{ if(!e.target.closest(".searchwrap")) closeSearch(); });
+
+/* ---------------- admin editor ---------------- */
+function renderAdmin(){
+  if(!CAN_EDIT){
+    content.innerHTML = `<div class="secttitle" style="margin-top:4px">Admin editor</div>
+      <div class="banner info"><span class="g">⚠</span> You do not have permission to edit protocols. Only senior staff can access the editor.</div>` + disclaimer();
+    return;
+  }
+  let html = `<div class="secttitle" style="margin-top:4px">Admin editor</div>
+    <div class="adminbar">
+      <button class="btn primary" onclick="adminNew()">＋ New protocol</button>
+      <button class="btn ghost" onclick="adminNewDrug()">＋ New drug</button>
+      <button class="btn primary" onclick="saveToServer()" id="savebtn">Save to server</button>
+      <button class="btn ghost" onclick="exportData()">⭳ Export data.js</button>
+      <button class="btn ghost" onclick="importData()">⭱ Import data.js</button>
+    </div>
+    <div id="save-status"></div>`;
+  html += `<div class="secttitle">Protocols</div><div class="editlist">`;
+  DATA.protocols.forEach(p=>{
+    html += `<div class="drugrow"><div class="drugrow-h" style="cursor:default">
+      <span class="dn">${esc(p.name)}</span>
+      <span class="dclass">${esc((catById(p.category)||{}).name||p.category)}</span>
+      <span class="pri ${p.priority}" style="margin-left:auto">${p.priority}</span>
+      <button class="btn ghost" style="padding:6px 12px;margin-left:10px" onclick="adminEdit('${p.id}')">Edit</button>
+      <button class="btn danger" style="padding:6px 12px" onclick="adminDelete('${p.id}')">Delete</button>
+    </div></div>`;
+  });
+  html += `</div>`;
+  content.innerHTML = html + disclaimer();
+}
+
+function protoForm(p){
+  const cats = DATA.categories.map(c=>`<option value="${c.id}" ${p.category===c.id?"selected":""}>${esc(c.name)}</option>`).join("");
+  const pris = ["red","amber","green"].map(x=>`<option value="${x}" ${p.priority===x?"selected":""}>${x}</option>`).join("");
+  const drugOpts = DATA.drugs.map(d=>{
+    const on = (p.drugs||[]).includes(d.id);
+    return `<div class="drugcheck${on?" checked":""}" onclick="var c=this.classList.toggle('checked');this.querySelector('input').checked=c;this.querySelector('.dc-box').textContent=c?'✓':''"><input type="checkbox" data-drug="${d.id}" ${on?"checked":""} style="display:none"><span class="dc-box">${on?"✓":""}</span><span class="dc-name">${esc(d.name)}</span></div>`;
+  }).join("");
+  return `
+   <div class="crumb"><a onclick="route('admin')">Admin</a><span>›</span><span>${p.__new?"New protocol":"Edit"}</span></div>
+   <div class="secttitle" style="margin-top:0">${p.__new?"New protocol":"Editing: "+esc(p.name)}</div>
+   <div class="row2">
+     <div class="field"><label>Name</label><input id="f-name" value="${esc(p.name||"")}"></div>
+     <div class="field"><label>ID (no spaces)</label><input id="f-id" value="${esc(p.id||"")}" ${p.__new?"":"readonly"}><div class="hint">Used in links. Leave as-is when editing.</div></div>
+   </div>
+   <div class="row2">
+     <div class="field"><label>Category</label><select id="f-cat">${cats}</select></div>
+     <div class="field"><label>Priority</label><select id="f-pri">${pris}</select></div>
+   </div>
+   <div class="field"><label>Summary (one line)</label><input id="f-sum" value="${esc(p.summary||"")}"></div>
+   <div class="field"><label>Also known as (comma separated — helps search)</label><input id="f-aka" value="${esc((p.alsoKnownAs||[]).join(", "))}"></div>
+   <div class="field"><label>Assessment (one point per line)</label><textarea id="f-assess">${esc((p.assess||[]).join("\n"))}</textarea></div>
+   <div class="field"><label>Red flags (one per line)</label><textarea id="f-flags">${esc((p.redFlags||[]).join("\n"))}</textarea></div>
+   <div class="field"><label>Treatment steps (one per line, in order)</label><textarea id="f-treat">${esc((p.treat||[]).join("\n"))}</textarea></div>
+   <div class="field"><label>Medications</label><div class="drugpicker">${drugOpts||'<span class="hint">No drugs in formulary yet.</span>'}</div></div>
+   <div class="field"><label>Transport guidance</label><textarea id="f-trans">${esc(p.transport||"")}</textarea></div>
+   <div class="field"><label>Decision tree (optional, advanced)</label>
+     <textarea id="f-tree" style="min-height:120px;font-family:ui-monospace,monospace;font-size:12px">${esc(p.tree?JSON.stringify(p.tree,null,2):"")}</textarea>
+     <div class="hint">JSON. Each node: {"q":"question","yes":…,"no":…}. A branch can be another node or a plain "action" string. Leave blank for none.</div>
+   </div>
+   <div class="adminbar">
+     <button class="btn primary" onclick="adminSave(${p.__new?"true":"false"})">Save</button>
+     <button class="btn ghost" onclick="route('admin')">Cancel</button>
+   </div>`;
+}
+
+let editingId = null;
+function adminEdit(id){ editingId=id; content.innerHTML = protoForm(protoById(id)) + disclaimer(); }
+function adminNew(){ editingId=null; content.innerHTML = protoForm({__new:true,priority:"amber",category:DATA.categories[0].id}) + disclaimer(); }
+function adminSave(isNew){
+  const lines = v => v.split("\n").map(s=>s.trim()).filter(Boolean);
+  const id = $("#f-id").value.trim() || $("#f-name").value.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-");
+  const obj = {
+    id, name:$("#f-name").value.trim(), category:$("#f-cat").value, priority:$("#f-pri").value,
+    summary:$("#f-sum").value.trim(),
+    alsoKnownAs:$("#f-aka").value.split(",").map(s=>s.trim()).filter(Boolean),
+    assess:lines($("#f-assess").value), redFlags:lines($("#f-flags").value), treat:lines($("#f-treat").value),
+    drugs:[...document.querySelectorAll("[data-drug]:checked")].map(c=>c.dataset.drug),
+    transport:$("#f-trans").value.trim()
+  };
+  const treeRaw = $("#f-tree").value.trim();
+  if(treeRaw){ try{ obj.tree = JSON.parse(treeRaw); }catch(e){ alert("Decision tree JSON is invalid:\n"+e.message); return; } }
+  if(!obj.name){ alert("Name is required."); return; }
+  if(isNew){
+    if(protoById(id)){ alert("A protocol with that ID already exists."); return; }
+    DATA.protocols.push(obj);
+  } else {
+    const i = DATA.protocols.findIndex(p=>p.id===editingId);
+    DATA.protocols[i] = obj;
+  }
+  INDEX = buildIndex();
+  route("admin");
+}
+function adminDelete(id){
+  if(!confirm("Delete this protocol? Export afterwards to make it permanent.")) return;
+  DATA.protocols = DATA.protocols.filter(p=>p.id!==id);
+  INDEX = buildIndex(); route("admin");
+}
+
+/* drug editor (simple prompt-based add; full fields) */
+function adminNewDrug(){
+  content.innerHTML = drugForm({__new:true}) + disclaimer();
+}
+function drugForm(d){
+  return `<div class="crumb"><a onclick="route('admin')">Admin</a><span>›</span><span>New drug</span></div>
+   <div class="secttitle" style="margin-top:0">New medication</div>
+   <div class="row2">
+     <div class="field"><label>Name</label><input id="d-name" value="${esc(d.name||"")}"></div>
+     <div class="field"><label>ID (no spaces)</label><input id="d-id" value="${esc(d.id||"")}"></div>
+   </div>
+   <div class="field"><label>Class</label><input id="d-class" value="${esc(d.class||"")}"></div>
+   <div class="field"><label>Dose</label><input id="d-dose" value="${esc(d.dose||"")}"></div>
+   <div class="field"><label>Route</label><input id="d-route" value="${esc(d.route||"")}"></div>
+   <div class="field"><label>Indications</label><textarea id="d-ind">${esc(d.indications||"")}</textarea></div>
+   <div class="field"><label>Cautions</label><textarea id="d-caut">${esc(d.cautions||"")}</textarea></div>
+   <div class="field"><label>Notes</label><textarea id="d-notes">${esc(d.notes||"")}</textarea></div>
+   <div class="adminbar"><button class="btn primary" onclick="drugSave()">Save</button><button class="btn ghost" onclick="route('admin')">Cancel</button></div>`;
+}
+function drugSave(){
+  const id = $("#d-id").value.trim() || $("#d-name").value.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-");
+  if(!$("#d-name").value.trim()){ alert("Name required."); return; }
+  if(drugById(id)){ alert("Drug ID already exists."); return; }
+  DATA.drugs.push({ id, name:$("#d-name").value.trim(), class:$("#d-class").value.trim(),
+    dose:$("#d-dose").value.trim(), route:$("#d-route").value.trim(),
+    indications:$("#d-ind").value.trim(), cautions:$("#d-caut").value.trim(), notes:$("#d-notes").value.trim() });
+  INDEX = buildIndex(); route("admin");
+}
+
+/* export / import */
+function exportData(){
+  DATA.meta.updated = new Date().toISOString().slice(0,10);
+  const body = "/* SAMS clinical data — exported "+DATA.meta.updated+" */\n\nconst SAMS_DATA = "
+    + JSON.stringify(DATA,null,2) + ";\n\nif (typeof module !== \"undefined\") { module.exports = SAMS_DATA; }\n";
+  const blob = new Blob([body],{type:"text/javascript"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "data.js"; a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importData(){
+  const inp = document.createElement("input"); inp.type="file"; inp.accept=".js,.json,.txt";
+  inp.onchange = ()=>{
+    const f = inp.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ()=>{
+      try{
+        const txt = r.result;
+        const m = txt.match(/const\s+SAMS_DATA\s*=\s*([\s\S]*?);\s*(if\s*\(typeof|$)/);
+        const json = m ? m[1] : txt;
+        const parsed = JSON.parse(json);
+        if(!parsed.protocols||!parsed.drugs) throw new Error("File missing protocols or drugs.");
+        DATA = parsed; INDEX = buildIndex(); route("admin");
+        alert("Imported. Remember to Export and replace data.js on the server to persist.");
+      }catch(e){ alert("Could not import: "+e.message); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+
+/* ---------------- save to server ---------------- */
+async function saveToServer(){
+  const btn = $("#savebtn");
+  const status = $("#save-status");
+  if(btn) btn.disabled = true;
+  if(status) status.innerHTML = `<div class="banner info"><span class="g">⏳</span> Saving...</div>`;
+
+  const result = await nuiFetch('saveData', { data: DATA });
+
+  if(result && result.ok){
+    if(status) status.innerHTML = `<div class="banner ok"><span class="g">✓</span> Saved successfully. All players will see the updated data.</div>`;
+  } else {
+    const msg = (result && result.error) || 'Could not reach the server.';
+    if(status) status.innerHTML = `<div class="banner info"><span class="g">⚠</span> Save failed: ${esc(msg)}</div>`;
+  }
+  if(btn) btn.disabled = false;
+}
+
+/* ---------------- misc ---------------- */
+function disclaimer(){
+  return `<div class="disc">${esc(DATA.meta.service)} · Clinical Reference v${esc(DATA.meta.version)} · ${esc(DATA.meta.disclaimer)}</div>`;
+}
+function getTheme(){
+  return document.documentElement.getAttribute("data-theme") || document.body.getAttribute("data-theme") || "light";
+}
+function setTheme(t){
+  document.documentElement.setAttribute("data-theme", t);
+  document.body.setAttribute("data-theme", t);
+}
+$("#themebtn").addEventListener("click",()=>{ setTheme(getTheme()==="dark"?"light":"dark"); });
+if(getTheme()==="dark" || document.body.getAttribute("data-theme-preference")==="dark"){ setTheme("dark"); }
+
+/* ---------------- init: load from server ---------------- */
+async function init(){
+  const adminBtn = document.querySelector('[data-view="admin"]');
+  const inGame = !!globalThis.GetParentResourceName;
+
+  const serverData = await nuiFetch('getData');
+  if(serverData && serverData.protocols){
+    DATA = serverData;
+    INDEX = buildIndex();
+  }
+
+  if(inGame){
+    const editCheck = await nuiFetch('canEdit');
+    if(editCheck && editCheck.allowed){
+      CAN_EDIT = true;
+    } else {
+      if(adminBtn) adminBtn.style.display = 'none';
+    }
+  } else {
+    CAN_EDIT = true;
+  }
+
+  renderHome();
+}
+
+window.addEventListener('message', (event) => {
+  if (event.data === 'componentsLoaded') init();
+});
+if (!globalThis.GetParentResourceName) init();
+</script>
+</body>
+</html>
