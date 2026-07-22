@@ -2646,7 +2646,211 @@ const SAMS_DATA = {
         "no": "Decontaminate first — remove contaminated clothing, wash skin — before close, prolonged patient contact. Use appropriate PPE throughout."
       }
     }
-  ]
+  ],
+  "quickRef": {
+    "assessmentOrder": [
+      "Scene safe? — do not become a second patient",
+      "Stop the bleeding — catastrophic haemorrhage comes first",
+      "Airway — is it open and clear?",
+      "Breathing — are they breathing normally?",
+      "Pulse — do they have one? Is it fast, slow or weak?",
+      "Are they awake? — talk to them, squeeze their hand",
+      "Quick head-to-toe — look for anything you missed",
+      "Decide transport only AFTER the head-to-toe. Not before."
+    ],
+    "alwaysTransport": [
+      "Shot or stabbed in head, neck, chest, back, stomach or groin",
+      "Bleeding you could not stop",
+      "Struggling to breathe, or any chest pain",
+      "Neck or back pain after a crash, fall or beating",
+      "Broken femur or pelvis · open fracture · anything amputated",
+      "Burns to the face or airway, or a large burn",
+      "Cardiac arrest, ongoing seizure, overdose, or stroke signs",
+      "Knocked out — even briefly",
+      "Confused, repeating themselves, or getting worse",
+      "They ask to go — always honour it"
+    ],
+    "safeOnScene": [
+      "Nothing from the red list above",
+      "Fully awake, never passed out",
+      "Breathing and pulse normal throughout",
+      "Bleeding stopped and stayed stopped",
+      "Can stand and walk unaided",
+      "They understand your advice and are happy to stay"
+    ],
+    "injuryTable": [
+      {
+        "injury": "Graze, shallow cut",
+        "onScene": "Clean and dress. Discharge.",
+        "hospital": "Only if deep or gaping"
+      },
+      {
+        "injury": "Deep cut",
+        "onScene": "Pressure and dressing",
+        "hospital": "Yes — needs stitches"
+      },
+      {
+        "injury": "Bad bleed on a limb",
+        "onScene": "Pressure, then tourniquet",
+        "hospital": "Yes — tourniquet on = go"
+      },
+      {
+        "injury": "Bleed on torso or neck",
+        "onScene": "Pack it and hold",
+        "hospital": "Yes, blue light"
+      },
+      {
+        "injury": "Something stuck in them",
+        "onScene": "Pad around it, leave it in",
+        "hospital": "Yes — never pull it out"
+      },
+      {
+        "injury": "Sprain or twist",
+        "onScene": "Support and advise. Discharge.",
+        "hospital": "Only if they cannot stand"
+      },
+      {
+        "injury": "Broken finger or toe",
+        "onScene": "Buddy strap. Usually discharge.",
+        "hospital": "If bent, open or pale"
+      },
+      {
+        "injury": "Broken arm, wrist, ankle",
+        "onScene": "Splint and pain relief",
+        "hospital": "Yes — needs an X-ray"
+      },
+      {
+        "injury": "Broken femur or pelvis",
+        "onScene": "Splint or binder, minimal moving",
+        "hospital": "Yes, blue light"
+      },
+      {
+        "injury": "Dislocation",
+        "onScene": "Support as found",
+        "hospital": "Yes — do not pop it back"
+      },
+      {
+        "injury": "Bump on head, fully alert",
+        "onScene": "Dress it, give head injury advice",
+        "hospital": "Only if they vomit or go drowsy"
+      },
+      {
+        "injury": "Knocked out, any length",
+        "onScene": "Monitor, keep still",
+        "hospital": "Yes — always"
+      },
+      {
+        "injury": "Confused or repeating themselves",
+        "onScene": "Reassure and monitor",
+        "hospital": "Yes"
+      },
+      {
+        "injury": "Neck or back pain",
+        "onScene": "Collar and board, do not let them walk",
+        "hospital": "Yes"
+      },
+      {
+        "injury": "Bruised ribs, breathing fine",
+        "onScene": "Pain relief",
+        "hospital": "Only if breathing gets hard"
+      },
+      {
+        "injury": "Chest pain",
+        "onScene": "Sit up, oxygen, keep calm",
+        "hospital": "Yes — always"
+      },
+      {
+        "injury": "Wound to the chest",
+        "onScene": "Seal it",
+        "hospital": "Yes, blue light"
+      },
+      {
+        "injury": "Stomach pain after trauma",
+        "onScene": "Comfy position, nothing to eat or drink",
+        "hospital": "Yes — internal bleed risk"
+      },
+      {
+        "injury": "Small burn",
+        "onScene": "Cool with water, cover. Discharge.",
+        "hospital": "If blistered or large"
+      },
+      {
+        "injury": "Burn to face, hands or airway",
+        "onScene": "Cool, oxygen, watch the airway",
+        "hospital": "Yes, blue light"
+      },
+      {
+        "injury": "Smoke inhalation",
+        "onScene": "Oxygen and fresh air",
+        "hospital": "Yes — even if they feel fine"
+      },
+      {
+        "injury": "Electrocution or drowning",
+        "onScene": "Assess once safe, oxygen",
+        "hospital": "Yes — even if they look fine"
+      },
+      {
+        "injury": "Panic attack",
+        "onScene": "Calm them, coach the breathing",
+        "hospital": "Only if it will not settle"
+      },
+      {
+        "injury": "Fainted, now fine",
+        "onScene": "Lie flat, legs up",
+        "hospital": "If injured or it happens again"
+      },
+      {
+        "injury": "Seizure, now waking up",
+        "onScene": "Recovery position, stay with them",
+        "hospital": "If first ever, or injured"
+      },
+      {
+        "injury": "Seizure still going",
+        "onScene": "Protect head, oxygen",
+        "hospital": "Yes, blue light"
+      },
+      {
+        "injury": "Overdose",
+        "onScene": "Airway, recovery position",
+        "hospital": "Yes — bring the packaging"
+      },
+      {
+        "injury": "Allergic reaction",
+        "onScene": "Adrenaline, sit them up",
+        "hospital": "Yes, blue light"
+      },
+      {
+        "injury": "Diabetic — shaky, confused",
+        "onScene": "Sugar if they can swallow",
+        "hospital": "If they do not improve"
+      },
+      {
+        "injury": "Stroke signs (FAST)",
+        "onScene": "Nothing by mouth, note the time",
+        "hospital": "Yes, blue light — time is brain"
+      },
+      {
+        "injury": "Cardiac arrest",
+        "onScene": "CPR and defib now",
+        "hospital": "Yes, once you have a pulse back"
+      },
+      {
+        "injury": "Pregnancy problem",
+        "onScene": "Comfy position, monitor",
+        "hospital": "Yes — any bleeding, pain or seizure"
+      },
+      {
+        "injury": "Mental health crisis",
+        "onScene": "Listen, keep them safe, no judgement",
+        "hospital": "If they are a danger to themselves"
+      },
+      {
+        "injury": "Intoxicated person",
+        "onScene": "Recovery position if drowsy",
+        "hospital": "If injured, hypothermic or unrousable"
+      }
+    ]
+  }
 };
 
 if (typeof module !== "undefined") { module.exports = SAMS_DATA; }

@@ -35,13 +35,34 @@ local function saveData()
 end
 
 local function canEdit(source)
-    local player = exports['qbx_core']:GetPlayer(source)
-    if not player then return false end
-    local job = player.PlayerData.job
-    if not job then return false end
+    local jobName, grade
 
-    local jobName = string.lower(job.name)
-    local grade = job.grade and job.grade.level or 0
+    if GetResourceState('qbx_core') == 'started' then
+        local player = exports['qbx_core']:GetPlayer(source)
+        if not player then return false end
+        local job = player.PlayerData.job
+        if not job then return false end
+        jobName = string.lower(job.name)
+        grade = job.grade and job.grade.level or 0
+    elseif GetResourceState('qb-core') == 'started' then
+        local QBCore = exports['qb-core']:GetCoreObject()
+        local player = QBCore.Functions.GetPlayer(source)
+        if not player then return false end
+        local job = player.PlayerData.job
+        if not job then return false end
+        jobName = string.lower(job.name)
+        grade = job.grade and job.grade.level or 0
+    elseif GetResourceState('es_extended') == 'started' then
+        local ESX = exports['es_extended']:getSharedObject()
+        local xPlayer = ESX.GetPlayerFromId(source)
+        if not xPlayer then return false end
+        local job = xPlayer.getJob()
+        if not job then return false end
+        jobName = string.lower(job.name)
+        grade = job.grade or 0
+    else
+        return false
+    end
 
     for _, allowed in ipairs(Config.EditorJobs) do
         if string.lower(allowed) == jobName and grade >= Config.EditorMinGrade then
@@ -59,6 +80,15 @@ end)
 
 lib.callback.register('sams-clinical:canEdit', function(source)
     return canEdit(source)
+end)
+
+lib.callback.register('sams-clinical:getDrugs', function()
+    if not cachedData or not cachedData.drugs then return {} end
+    local list = {}
+    for _, d in ipairs(cachedData.drugs) do
+        list[#list + 1] = { id = d.id, name = d.name, dose = d.dose, route = d.route }
+    end
+    return list
 end)
 
 lib.callback.register('sams-clinical:saveData', function(source, newData)

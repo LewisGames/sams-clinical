@@ -224,6 +224,32 @@
   .dc-name{font-weight:500}
   .drugpicker{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;padding:4px 0}
 
+  /* quick ref */
+  .qr-order{list-style:none;counter-reset:qr}
+  .qr-order li{counter-increment:qr;position:relative;padding:10px 0 10px 44px;border-bottom:1px solid var(--line-2);font-size:14.5px;line-height:1.5}
+  .qr-order li:last-child{border-bottom:none}
+  .qr-order li:before{
+    content:counter(qr);position:absolute;left:0;top:9px;width:28px;height:28px;border-radius:50%;
+    background:var(--accent);color:#fff;font-size:13px;font-weight:700;
+    display:flex;align-items:center;justify-content:center
+  }
+  .qr-box{border-radius:var(--radius);padding:16px 18px;margin-bottom:14px}
+  .qr-box.red{background:var(--red-bg);border:1.5px solid var(--red-line)}
+  .qr-box.red h3{color:var(--red);margin-bottom:8px;font-size:13px;text-transform:uppercase;letter-spacing:.5px}
+  .qr-box.green{background:var(--green-bg);border:1.5px solid var(--green-line)}
+  .qr-box.green h3{color:var(--green);margin-bottom:8px;font-size:13px;text-transform:uppercase;letter-spacing:.5px}
+  .qr-box ul{list-style:none}
+  .qr-box ul li{padding:4px 0 4px 16px;position:relative;font-size:13.5px;line-height:1.5}
+  .qr-box.red ul li:before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--red)}
+  .qr-box.green ul li:before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--green)}
+  .qr-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .qr-table th{background:var(--rail);color:#fff;text-align:left;padding:10px 14px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+  .qr-table td{padding:9px 14px;border-top:1px solid var(--line-2);vertical-align:top}
+  .qr-table tr:hover td{background:var(--panel-2)}
+  .qr-table .hosp-yes{color:var(--red);font-weight:600}
+  .qr-table .hosp-no{color:var(--green)}
+  .qr-table-wrap{overflow-x:auto;border-radius:var(--radius)}
+
   .disc{font-size:11.5px;color:var(--faint);margin-top:28px;padding-top:14px;border-top:1px solid var(--line);line-height:1.6}
 
   @media (max-width:720px){
@@ -234,7 +260,8 @@
   }
 
   /* standalone NUI overlay */
-  #app-root{display:flex;height:100%}
+  #app-root{display:flex;height:100%;width:100%}
+  .app-frame{display:flex;width:100%;height:100%;overflow:hidden}
   #app-root.standalone-mode{
     display:none;position:fixed;inset:0;z-index:9999;
     background:rgba(0,0,0,.65);justify-content:center;align-items:center;
@@ -243,10 +270,8 @@
   #app-root.standalone-mode .app-frame{
     width:min(1200px,92vw);height:min(780px,88vh);
     border-radius:14px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5);
-    display:flex;background:var(--bg);
+    background:var(--bg);
   }
-  #app-root.standalone-mode aside,
-  #app-root.standalone-mode main{height:100%}
   .close-standalone{
     position:absolute;top:14px;right:18px;z-index:100;
     width:32px;height:32px;border-radius:8px;border:1px solid var(--line);
@@ -255,6 +280,7 @@
   }
   .close-standalone:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
   #app-root.standalone-mode .close-standalone{display:flex}
+  .closebtn:hover{color:#fff!important;background:rgba(235,106,91,.15)!important}
 
   /* tabler icons subset via unicode fallback — we ship simple inline glyphs */
   .g{font-style:normal;font-weight:700}
@@ -270,11 +296,14 @@
     <div class="mark"></div>
     <div><h1>SAMS</h1><p>Clinical Reference</p></div>
   </div>
-  <div class="rail-sec">Reference</div>
-  <button class="nav on" data-view="home"><span class="g">▤</span><span class="lbl">Protocols</span></button>
+  <div class="rail-sec">Start here</div>
+  <button class="nav on" data-view="quickref"><span class="g">⚡</span><span class="lbl">Quick Ref</span></button>
+  <div class="rail-sec">Detailed</div>
+  <button class="nav" data-view="home"><span class="g">▤</span><span class="lbl">Protocols</span></button>
   <button class="nav" data-view="formulary"><span class="g">℞</span><span class="lbl">Formulary</span></button>
   <div class="rail-sec">Command</div>
   <button class="nav" data-view="admin"><span class="g">✎</span><span class="lbl">Admin editor</span></button>
+  <button class="nav closebtn" id="closebtn" onclick="closeApp()" style="margin-top:auto;border-top:1px solid rgba(255,255,255,.06);padding-top:12px"><span class="g">✕</span><span class="lbl">Close</span></button>
   <div class="railfoot" id="foot">Roleplay reference only.<br>Not real medical advice.</div>
 </aside>
 
@@ -335,7 +364,8 @@ document.querySelectorAll("aside .nav").forEach(b=>{
 });
 
 function route(view,arg){
-  setNav(["home","formulary","admin"].includes(view)?view:"home");
+  setNav(["home","quickref","formulary","admin"].includes(view)?view:"quickref");
+  if(view==="quickref") return renderQuickRef();
   if(view==="home") return renderHome();
   if(view==="protocol") return renderProtocol(arg);
   if(view==="formulary") return renderFormulary();
@@ -357,6 +387,54 @@ function renderHome(){
     });
     html += `</div>`;
   });
+  content.innerHTML = html + disclaimer();
+}
+
+/* ---------------- quick reference ---------------- */
+function renderQuickRef(){
+  const qr = DATA.quickRef || {};
+  let html = '';
+
+  html += `<div style="margin-bottom:20px">
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:4px">Quick Reference</h2>
+    <p style="color:var(--muted);font-size:14px;line-height:1.5">
+      Plain English, no jargon. This page tells you what to do on any call.<br>
+      For full clinical detail, see the <a style="color:var(--accent);cursor:pointer" onclick="route('home')">Protocols</a> tab.
+    </p>
+  </div>`;
+
+  const rows = qr.injuryTable || [];
+  if(rows.length){
+    html += `<div class="secttitle" style="margin-top:0">What do I do?</div>`;
+    html += `<p style="color:var(--muted);font-size:13px;margin-bottom:12px">Find the injury. Do what it says. Check the hospital column.</p>`;
+    html += `<div class="qr-table-wrap"><table class="qr-table"><thead><tr><th style="width:25%">Injury</th><th style="width:40%">What to do on scene</th><th style="width:35%">Go to hospital?</th></tr></thead><tbody>`;
+    rows.forEach(r=>{
+      const h = (r.hospital||"").toLowerCase();
+      const cls = h.startsWith("yes") ? "hosp-yes" : (h.startsWith("no")||h.startsWith("only if")||h.startsWith("if ")) ? "hosp-no" : "";
+      html += `<tr><td><b>${esc(r.injury)}</b></td><td>${esc(r.onScene)}</td><td class="${cls}">${esc(r.hospital)}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  html += `<div class="secttitle">Every call — follow this order</div>`;
+  html += `<p style="color:var(--muted);font-size:13px;margin-bottom:12px">Do these steps in order, every single time. Don't skip ahead.</p>`;
+  html += `<div class="block"><div class="block-b">`;
+  html += `<ol class="qr-order">${(qr.assessmentOrder||[]).map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`;
+  html += `</div></div>`;
+
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">`;
+
+  html += `<div class="qr-box red"><h3>Take them to hospital if...</h3><ul>`;
+  html += (qr.alwaysTransport||[]).map(s=>`<li>${esc(s)}</li>`).join("");
+  html += `</ul></div>`;
+
+  html += `<div class="qr-box green"><h3>Safe to leave on scene if...</h3><ul>`;
+  html += (qr.safeOnScene||[]).map(s=>`<li>${esc(s)}</li>`).join("");
+  html += `<li style="padding-top:8px;font-weight:600;color:var(--green)">ALL of these must be true. If in doubt, transport.</li>`;
+  html += `</ul></div>`;
+
+  html += `</div>`;
+
   content.innerHTML = html + disclaimer();
 }
 
@@ -712,18 +790,22 @@ async function init(){
     CAN_EDIT = true;
   }
 
-  renderHome();
+  renderQuickRef();
 }
 
 /* ---------------- standalone NUI mode ---------------- */
 let standaloneMode = false;
 const appRoot = document.getElementById('app-root');
 
-function closeStandalone(){
-  if(!standaloneMode) return;
-  appRoot.classList.remove('open');
-  nuiFetch('closeApp');
+function closeApp(){
+  if(standaloneMode){
+    appRoot.classList.remove('open');
+    nuiFetch('closeApp');
+  } else if(globalThis.closeApp){
+    globalThis.closeApp();
+  }
 }
+function closeStandalone(){ closeApp(); }
 
 window.addEventListener('message', (event) => {
   const d = event.data;

@@ -8,7 +8,10 @@ description 'SAMS Clinical Reference — protocols, formulary, decision trees an
 version '2.0.0'
 
 shared_script '@ox_lib/init.lua'
-client_script 'client.lua'
+client_scripts {
+    'client.lua',
+    'target.lua'
+}
 server_script 'server.lua'
 
 files {
