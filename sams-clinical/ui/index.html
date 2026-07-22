@@ -233,11 +233,36 @@
     .row2{grid-template-columns:1fr}
   }
 
+  /* standalone NUI overlay */
+  #app-root{display:flex;height:100%;width:100%}
+  .app-frame{display:flex;width:100%;height:100%;overflow:hidden}
+  #app-root.standalone-mode{
+    display:none;position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,.65);justify-content:center;align-items:center;
+  }
+  #app-root.standalone-mode.open{display:flex}
+  #app-root.standalone-mode .app-frame{
+    width:min(1200px,92vw);height:min(780px,88vh);
+    border-radius:14px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5);
+    background:var(--bg);
+  }
+  .close-standalone{
+    position:absolute;top:14px;right:18px;z-index:100;
+    width:32px;height:32px;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel);color:var(--muted);font-size:18px;cursor:pointer;
+    display:none;align-items:center;justify-content:center;
+  }
+  .close-standalone:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-line)}
+  #app-root.standalone-mode .close-standalone{display:flex}
+
   /* tabler icons subset via unicode fallback — we ship simple inline glyphs */
   .g{font-style:normal;font-weight:700}
 </style>
 </head>
 <body>
+
+<div id="app-root">
+<div class="app-frame">
 
 <aside>
   <div class="logo">
@@ -262,7 +287,11 @@
     <button class="toolbtn" id="themebtn"><span class="g">◐</span> Theme</button>
   </div>
   <div class="content" id="content"></div>
+  <button class="close-standalone" onclick="closeStandalone()" title="Close (Escape)">✕</button>
 </main>
+
+</div><!-- .app-frame -->
+</div><!-- #app-root -->
 
 <script src="data.js"></script>
 <script>
@@ -685,9 +714,35 @@ async function init(){
   renderHome();
 }
 
+/* ---------------- standalone NUI mode ---------------- */
+let standaloneMode = false;
+const appRoot = document.getElementById('app-root');
+
+function closeStandalone(){
+  if(!standaloneMode) return;
+  appRoot.classList.remove('open');
+  nuiFetch('closeApp');
+}
+
 window.addEventListener('message', (event) => {
-  if (event.data === 'componentsLoaded') init();
+  const d = event.data;
+  if (d === 'componentsLoaded') { init(); return; }
+  if (d && d.action === 'open' && d.mode === 'standalone') {
+    standaloneMode = true;
+    appRoot.classList.add('standalone-mode', 'open');
+    init();
+    return;
+  }
+  if (d && d.action === 'close') {
+    appRoot.classList.remove('open');
+    return;
+  }
 });
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && standaloneMode) closeStandalone();
+});
+
 if (!globalThis.GetParentResourceName) init();
 </script>
 </body>

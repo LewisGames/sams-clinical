@@ -1,9 +1,11 @@
 --[[
-    SAMS Clinical — LB Tablet custom app
+    SAMS Clinical — LB Tablet custom app + standalone NUI
 
-    Config below. If RestrictToJobs is empty the app is available to everyone.
-    If it has entries, the app is added when the player is on one of those jobs
-    and removed when they are not.
+    Works two ways:
+      1. As an LB Tablet custom app (if lb-tablet is running)
+      2. As a standalone NUI opened with /sams (always available)
+
+    Both modes share the same server backend and data.
 ]]
 
 local Config = {
@@ -14,6 +16,9 @@ local Config = {
     Size         = 420,
     DefaultApp   = true,
 
+    -- /sams command to open the standalone NUI (set false to disable)
+    StandaloneCommand = 'sams',
+
     -- e.g. { 'ambulance', 'ems', 'sams' }  |  leave empty for everyone
     RestrictToJobs = {},
 
@@ -23,6 +28,8 @@ local Config = {
 
 local registered = false
 local appOpen = false
+local standaloneOpen = false
+local hasTablet = false
 
 local function getJob()
     if GetResourceState('qbx_core') == 'started' then
@@ -48,6 +55,43 @@ local function isAllowed()
     end
     return false
 end
+
+-- ==================== Standalone NUI ====================
+
+local function openStandalone()
+    if standaloneOpen then return end
+    if not isAllowed() then
+        lib.notify({ title = 'SAMS Clinical', description = 'Not available for your current job', type = 'error' })
+        return
+    end
+    standaloneOpen = true
+    SetNuiFocus(true, true)
+    SendNUIMessage({ action = 'open', mode = 'standalone' })
+end
+
+local function closeStandalone()
+    if not standaloneOpen then return end
+    standaloneOpen = false
+    SetNuiFocus(false, false)
+    SendNUIMessage({ action = 'close' })
+end
+
+RegisterNUICallback('closeApp', function(_, cb)
+    closeStandalone()
+    cb({})
+end)
+
+if Config.StandaloneCommand then
+    RegisterCommand(Config.StandaloneCommand, function()
+        if standaloneOpen then
+            closeStandalone()
+        else
+            openStandalone()
+        end
+    end, false)
+end
+
+-- ==================== LB Tablet app ====================
 
 local uiUrl = GetResourceMetadata(GetCurrentResourceName(), 'ui_page', 0)
 
@@ -87,10 +131,21 @@ local function removeApp()
 end
 
 CreateThread(function()
-    while GetResourceState('lb-tablet') ~= 'started' do
-        Wait(500)
+    if GetResourceState('lb-tablet') ~= 'started' then
+        local waited = 0
+        while GetResourceState('lb-tablet') ~= 'started' and waited < 10000 do
+            Wait(500)
+            waited = waited + 500
+        end
     end
 
+    if GetResourceState('lb-tablet') ~= 'started' then
+        hasTablet = false
+        print(('[%s] lb-tablet not found — running in standalone mode only (/sams)'):format(GetCurrentResourceName()))
+        return
+    end
+
+    hasTablet = true
     Wait(1000)
 
     if #Config.RestrictToJobs == 0 then
@@ -110,8 +165,11 @@ end)
 
 AddEventHandler('onResourceStop', function(resource)
     if resource ~= GetCurrentResourceName() then return end
-    removeApp()
+    if hasTablet then removeApp() end
+    if standaloneOpen then closeStandalone() end
 end)
+
+-- ==================== NUI callbacks (shared by both modes) ====================
 
 RegisterNUICallback('getData', function(_, cb)
     local data = lib.callback.await('sams-clinical:getData', false)

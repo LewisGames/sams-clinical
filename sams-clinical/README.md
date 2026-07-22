@@ -1,9 +1,15 @@
-# SAMS Clinical — LB Tablet App
+# SAMS Clinical — EMS Protocol Reference
 
-A clinical reference and protocol tool for EMS medics, built as a custom app
-for [LB Tablet](https://lbscripts.com/). Protocols, a drug formulary, step-by-step
-decision trees, global search, and an in-app editor for command staff — all
-inside the tablet.
+A clinical reference and protocol tool for EMS medics. Protocols, a drug
+formulary, step-by-step decision trees, global search, and an in-app editor
+for command staff.
+
+**Works two ways — no config needed:**
+- **With LB Tablet** — registers as a custom tablet app automatically
+- **Without LB Tablet** — opens as a standalone overlay via the `/sams` command
+
+Both modes share the same server backend and data. Edits made in either are
+instantly visible in the other.
 
 > **Roleplay reference only.** Drug doses are written to feel realistic but were
 > built for a game, not transcribed from a live clinical guideline. Have a member
@@ -16,9 +22,9 @@ inside the tablet.
 
 | Dependency | Why |
 |---|---|
-| [LB Tablet](https://lbscripts.com/) | The app registers itself as a custom tablet app |
-| [ox_lib](https://github.com/overextended/ox_lib) | Used for server ↔ client callbacks |
+| [ox_lib](https://github.com/overextended/ox_lib) | Used for server ↔ client callbacks and notifications |
 | **QBox (qbx_core)** *or* **QBCore (qb-core)** *or* **ESX** | Job and grade checks for the admin editor (auto-detected) |
+| [LB Tablet](https://lbscripts.com/) *(optional)* | If present, the app registers itself as a custom tablet app. If not, the `/sams` command still works. |
 
 > ox_lib ships with QBox. If you are on QBCore or ESX you may need to install
 > it separately — see the [ox_lib docs](https://overextended.dev/ox_lib).
@@ -33,14 +39,34 @@ inside the tablet.
    ```cfg
    ensure ox_lib
    ensure qbx_core   # or qb-core / es_extended
-   ensure lb-tablet
+   ensure lb-tablet   # optional — remove this line if you don't use LB Tablet
    ensure sams-clinical
    ```
 
 3. Restart the server (or `ensure sams-clinical` from the console).
 
-The app registers itself with LB Tablet automatically. Every player will see it
-in their tablet's app list.
+**With LB Tablet:** The app registers itself automatically. Every player will
+see it in their tablet's app list.
+
+**Without LB Tablet:** The resource prints a message to the console confirming
+standalone mode. Players use the `/sams` command to open it.
+
+**With both:** Players get the tablet app *and* the `/sams` command. Both
+share the same data.
+
+---
+
+## Standalone mode
+
+Type `/sams` in chat (or bind it to a key) to open the clinical reference as a
+full-screen overlay. Press **Escape** or click the **✕** button to close it.
+
+To change the command name, edit `client.lua`:
+```lua
+StandaloneCommand = 'sams',    -- change to whatever you like, e.g. 'medref'
+```
+
+Set it to `false` to disable the command entirely (tablet-only mode).
 
 ---
 
